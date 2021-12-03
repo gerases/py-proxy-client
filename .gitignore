@@ -1,6 +1,6 @@
 *.pyc
 .vscode
-venv
+env
 .idea
 .eggs
 pyproxy.egg-info

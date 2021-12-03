@@ -8,17 +8,19 @@ if six.PY2:
 else:
     import socketserver as SocketServer
 
+
 class MockStreamServer(StreamServer):
 
     def __init__(self):
-        super(MockStreamServer, self).__init__(('127.0.0.1', 0))
+        super().__init__(('127.0.0.1', 0))
 
         self.last_message = None
 
+    # pylint: disable=method-hidden
     def handle(self, socket, address):
         print('Handling connection!')
         self.last_message = socket.recv(1024)
-        socket.sendall('Hello {}'.format(address))
+        socket.sendall(f'Hello {address}')
         # socket.close()
 
 
@@ -42,7 +44,7 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
                 break
 
             # just send back the same data
-            print('GOT: {}'.format(data))
+            print(f'GOT: {data}')
             self.request.sendall(data)
 
 
@@ -50,10 +52,9 @@ class TestStreamServer(Thread):
     daemon = True
 
     def __init__(self):
-        super(TestStreamServer, self).__init__()
+        super().__init__()
         self.server = SocketServer.TCPServer(('127.0.0.1', 0), MyTCPHandler)
         self.server_host, self.server_port = self.server.server_address
 
     def run(self):
         self.server.serve_forever()
-

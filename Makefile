@@ -1,30 +1,45 @@
-.PHONY: unit-test, integration-test, test, test-install, nopyc, test-server, install, clean
+env_dir := env
 
-venv:
-	virtualenv venv
+$(env_dir): env-clean env-create env-update
+	@echo -e "\n===> Done! Activate environment by executing 'source $(env_dir)/bin/activate'"
 
-install: venv nopyc
-	. venv/bin/activate; python setup.py install
+.PHONY: env-create
+env-create:
+	@echo "Building virtual env"
+	python3 -m venv --clear $(env_dir)
+	$(env_dir)/bin/pip install --upgrade --no-cache-dir pip setuptools wheel pylint
 
-test-install: venv nopyc
-	. venv/bin/activate; pip install -r test_requirements.txt
+.PHONY: env-update
+env-update:
+	$(env_dir)/bin/pip install --editable .[test]
 
+.PHONY: nopyc
 nopyc:
 	find . -iname '*.pyc' | xargs rm
 
-clean: nopyc
-	rm -rf venv
+.PHONY: env-clean
+# I'm not using the env_dir variable on purpose and hardcode the name
+# as 'env' to guard against accidents whereby env_dir is set to '/' for
+# example
+env-clean: nopyc
+	rm -rf env
 
+.PHONY: lint-test
+lint-test:
+	$(env_dir)/bin/python -m unittest tests/test_syntax.py
+
+.PHONY: unit-test
 unit-test: nopyc
-	. venv/bin/activate; python -m unittest discover -s tests/unit
+	$(env_dir)/bin/python -m unittest discover -s tests/unit
 
+.PHONY: integration-test
 integration-test: nopyc
-	. venv/bin/activate; python -m unittest discover -s tests/integration
+	$(env_dir)/bin/python -m unittest discover -s tests/integration
 
-test: unit-test integration-test
+.PHONY: test
+test: unit-test integration-test lint-test
 
+.PHONY: test-server
 test-server:
 	sudo pkill nginx
 	sudo nginx -c $(pwd)/nginx.conf
-    
-    
