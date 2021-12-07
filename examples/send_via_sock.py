@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import textwrap
-import pyproxy
+from pyproxy.const import V1, V2
 from pyproxy.sock import ProxyProtocolSocket
 
 
@@ -24,5 +24,5 @@ def send_directly_via_socket(proto):
     print(res)
 
 
-send_directly_via_socket(pyproxy.const.PROXY_PROTOCOL.V1)
-send_directly_via_socket(pyproxy.const.PROXY_PROTOCOL.V2)
+send_directly_via_socket(V1)
+send_directly_via_socket(V2)

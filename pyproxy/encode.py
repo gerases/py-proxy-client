@@ -6,7 +6,7 @@ import socket
 import struct
 from socket import AF_INET6
 
-from pyproxy.const import PROXY_PROTOCOL
+from pyproxy.const import TCP4, TCP6
 
 
 def encode_v1(protocol, src_ip, dst_ip, src_port, dst_port):
@@ -23,8 +23,8 @@ def encode_v1(protocol, src_ip, dst_ip, src_port, dst_port):
         establishing a connection.
     """
     prot = protocol.upper()
-    assert prot in (PROXY_PROTOCOL.TCP4,
-                    PROXY_PROTOCOL.TCP6,
+    assert prot in (TCP4,
+                    TCP6,
                     'UNKNOWN'), 'Unknown protocol {prot}'
     header = f'PROXY {prot} {src_ip} {dst_ip} {src_port} {dst_port}\r\n'
     return header.encode('ascii')
@@ -37,18 +37,18 @@ def encode_v2(protocol, src_ip, dst_ip, src_port, dst_port):
     https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt
     """
     prot = protocol.upper()
-    assert prot in (PROXY_PROTOCOL.TCP4,
-                    PROXY_PROTOCOL.TCP6,
+    assert prot in (TCP4,
+                    TCP6,
                     'UNKNOWN'), 'Unknown protocol {prot}'
 
     sig = b'\x0D\x0A\x0D\x0A\x00\x0D\x0A\x51\x55\x49\x54\x0A'
     ver_cmd = b'\x21'  # version 2, cmd=PROXY
-    if prot == PROXY_PROTOCOL.TCP4:
+    if prot == TCP4:
         src_addr = socket.inet_aton(src_ip)
         dst_addr = socket.inet_aton(dst_ip)
         fam = b'\x11'  # TCP over IPv4
         addr_len_bytes = 4
-    elif prot == PROXY_PROTOCOL.TCP6:
+    elif prot == TCP6:
         src_addr = socket.inet_pton(AF_INET6, src_ip)
         dst_addr = socket.inet_pton(AF_INET6, dst_ip)
         fam = b'\x21'  # TCP over IPv6

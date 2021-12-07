@@ -4,7 +4,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.connection import HTTPConnection
 from urllib3.connectionpool import HTTPConnectionPool
 
-from pyproxy.const import PROXY_PROTOCOL
+from pyproxy.const import V1
 
 from .sock import ProxyProtocolSocket
 
@@ -55,7 +55,7 @@ class ProxyAdapter(HTTPAdapter):
                                    self.src_addr)
 
 
-def ProxyClient(session, pp_version=PROXY_PROTOCOL.V1, src_addr=None):
+def ProxyClient(session, pp_version=V1, src_addr=None):
     session.mount('http://', ProxyAdapter(pp_version, src_addr=src_addr))
     session.mount('https://', ProxyAdapter(pp_version, src_addr=src_addr))
     return session

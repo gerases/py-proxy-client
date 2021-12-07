@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import requests
-import pyproxy
 from pyproxy.adapter import ProxyClient
+from pyproxy.const import V1, V2
 
 
 def send_via_requests(proto):
@@ -16,5 +16,5 @@ def send_via_requests(proto):
     print(resp.content)
 
 
-send_via_requests(pyproxy.const.PROXY_PROTOCOL.V1)
-send_via_requests(pyproxy.const.PROXY_PROTOCOL.V2)
+send_via_requests(V1)
+send_via_requests(V2)

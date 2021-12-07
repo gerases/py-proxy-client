@@ -1,6 +1,6 @@
 import unittest
 
-from pyproxy.const import PROXY_PROTOCOL
+from pyproxy.const import TCP4, V1, V2
 from pyproxy.encode import encode_v1, encode_v2
 from pyproxy.sock import ProxyProtocolSocket
 from tests.integration import TestStreamServer
@@ -16,10 +16,8 @@ class ProxyProtocolV1SocketTest(unittest.TestCase):
         self.server_port = self.mock_server.server_port
         print(f'Test server running on {self.server_host}:{self.server_port}')
         src_addr = (self.client_ip, self.client_port)
-        self.v1_sock = ProxyProtocolSocket(PROXY_PROTOCOL.V1,
-                                           src_addr=src_addr)
-        self.v2_sock = ProxyProtocolSocket(PROXY_PROTOCOL.V2,
-                                           src_addr=src_addr)
+        self.v1_sock = ProxyProtocolSocket(V1, src_addr=src_addr)
+        self.v2_sock = ProxyProtocolSocket(V2, src_addr=src_addr)
 
     def tearDown(self):
         # self.mock_server.stop()
@@ -36,7 +34,7 @@ class ProxyProtocolV1SocketTest(unittest.TestCase):
         self.v1_sock.connect(self.mock_server_address)
         resp = self.v1_sock.recv(1024)
 
-        header = encode_v1(PROXY_PROTOCOL.TCP4,
+        header = encode_v1(TCP4,
                            self.client_ip,
                            self.server_host,
                            self.client_port,
@@ -51,7 +49,7 @@ class ProxyProtocolV1SocketTest(unittest.TestCase):
     def test_proxy_protocol_v2(self):
         self.v2_sock.connect(self.mock_server_address)
         resp = self.v2_sock.recv(1024)
-        header = encode_v2(PROXY_PROTOCOL.TCP4,
+        header = encode_v2(TCP4,
                            self.client_ip,
                            self.server_host,
                            self.client_port,

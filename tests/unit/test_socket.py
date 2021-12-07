@@ -4,7 +4,7 @@ import unittest
 
 from mock import Mock
 
-from pyproxy.const import PROXY_PROTOCOL
+from pyproxy.const import TCP4, V1, V2
 from pyproxy.encode import encode_v1, encode_v2
 from pyproxy.sock import ProxyProtocolSocket
 
@@ -33,14 +33,14 @@ class ProxyProtocolSocketConstructorTest(BaseProxyProtocolSocketTest):
 
     def test_constructor_invalid_src_addr(self):
         with self.assertRaises(ValueError) as exc:
-            self.get_socket(PROXY_PROTOCOL.V1, src_addr='1.1.1.1')
+            self.get_socket(V1, src_addr='1.1.1.1')
 
         self.assertEqual('Invalid src_addr "1.1.1.1". Must be tuple of form'
                          ' (ip, port).',
                          str(exc.exception))
 
         with self.assertRaises(ValueError) as exc:
-            self.get_socket(PROXY_PROTOCOL.V1,
+            self.get_socket(V1,
                             src_addr=('1.1.1.1', '2.2.2.2', 3))
 
         self.assertEqual('Invalid src_addr "(\'1.1.1.1\', \'2.2.2.2\', 3)".'
@@ -48,7 +48,7 @@ class ProxyProtocolSocketConstructorTest(BaseProxyProtocolSocketTest):
                          str(exc.exception))
 
         with self.assertRaises(ValueError) as exc:
-            self.get_socket(PROXY_PROTOCOL.V1, src_addr=('1.1.1.1',))
+            self.get_socket(V1, src_addr=('1.1.1.1',))
 
         self.assertEqual('Invalid src_addr "(\'1.1.1.1\',)".'
                          ' Must be tuple of form (ip, port).',
@@ -56,29 +56,29 @@ class ProxyProtocolSocketConstructorTest(BaseProxyProtocolSocketTest):
 
     def test_constructor_invalid_port(self):
         with self.assertRaises(ValueError) as exc:
-            self.get_socket(PROXY_PROTOCOL.V1, src_addr=('1.1.1.1', 'port'))
+            self.get_socket(V1, src_addr=('1.1.1.1', 'port'))
 
         self.assertEqual('Invalid port "port" provided in src_addr.'
                          ' Must be an integer.', str(exc.exception))
 
     def test_constructor_v1(self):
-        sock = self.get_socket(PROXY_PROTOCOL.V1)
+        sock = self.get_socket(V1)
 
-        self.assertEqual(PROXY_PROTOCOL.V1, sock.proxy_version)
+        self.assertEqual(V1, sock.proxy_version)
         sock.close()
 
     def test_constructor_v1_with_src_addr(self):
-        sock = self.get_socket(PROXY_PROTOCOL.V1, src_addr=('1.1.1.1', 100))
+        sock = self.get_socket(V1, src_addr=('1.1.1.1', 100))
 
-        self.assertEqual(PROXY_PROTOCOL.V1, sock.proxy_version)
+        self.assertEqual(V1, sock.proxy_version)
         self.assertEqual('1.1.1.1', sock.pp_src_ip)
         self.assertEqual(100, sock.pp_src_port)
         sock.close()
 
     def test_constructor_v2(self):
-        sock = self.get_socket(PROXY_PROTOCOL.V2, src_addr=('2.2.2.2', 200))
+        sock = self.get_socket(V2, src_addr=('2.2.2.2', 200))
 
-        self.assertEqual(PROXY_PROTOCOL.V2, sock.proxy_version)
+        self.assertEqual(V2, sock.proxy_version)
         self.assertEqual('2.2.2.2', sock.pp_src_ip)
         self.assertEqual(200, sock.pp_src_port)
         sock.close()
@@ -105,12 +105,12 @@ class ProxyProtocolSocketHeaderTest(BaseProxyProtocolSocketTest):
             src_ip, src_port = src_addr
         else:
             src_ip, src_port = self.src_ip, self.src_port
-        if pp_version == PROXY_PROTOCOL.V1:
-            expected_header = encode_v1(PROXY_PROTOCOL.TCP4,
+        if pp_version == V1:
+            expected_header = encode_v1(TCP4,
                                         src_ip, self.dst_ip,
                                         src_port, self.dst_port)
         else:
-            expected_header = encode_v2(PROXY_PROTOCOL.TCP4,
+            expected_header = encode_v2(TCP4,
                                         src_ip,
                                         self.dst_ip, src_port,
                                         self.dst_port)
@@ -121,13 +121,13 @@ class ProxyProtocolSocketHeaderTest(BaseProxyProtocolSocketTest):
         sock.sendall.assert_called_once_with(expected_header)
 
     def test_v1_no_src_addr(self):
-        self.send_pp_header(PROXY_PROTOCOL.V1)
+        self.send_pp_header(V1)
 
     def test_v1_with_src_addr(self):
-        self.send_pp_header(PROXY_PROTOCOL.V1, self.custom_addr)
+        self.send_pp_header(V1, self.custom_addr)
 
     def test_v2_no_src_addr(self):
-        self.send_pp_header(PROXY_PROTOCOL.V2)
+        self.send_pp_header(V2)
 
     def test_v2_with_src_addr(self):
-        self.send_pp_header(PROXY_PROTOCOL.V2, self.custom_addr)
+        self.send_pp_header(V2, self.custom_addr)

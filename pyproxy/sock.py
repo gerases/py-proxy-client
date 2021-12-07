@@ -5,7 +5,7 @@ which uses the proxy protocol
 import socket
 
 from pyproxy import encode
-from pyproxy.const import PROXY_PROTOCOL
+from pyproxy.const import TCP4, V1, V2
 from pyproxy.error import ProxyProtocolError
 
 
@@ -25,7 +25,7 @@ class ProxyProtocolSocket(socket.socket):
         :param src_addr: Set a source address to send in proxy protocol header,
             defaults to socket's source address after connection.
         """
-        if pp_version not in (PROXY_PROTOCOL.V1, PROXY_PROTOCOL.V2):
+        if pp_version not in (V1, V2):
             raise ValueError(f'Invalid version "{pp_version}"')
 
         self.proxy_version = pp_version
@@ -53,12 +53,12 @@ class ProxyProtocolSocket(socket.socket):
         if not self.pp_src_ip or not self.pp_src_port:
             self.pp_src_ip, self.pp_src_port = self.getsockname()
 
-        if self.proxy_version == PROXY_PROTOCOL.V1:
-            header = encode.encode_v1(PROXY_PROTOCOL.TCP4,
+        if self.proxy_version == V1:
+            header = encode.encode_v1(TCP4,
                                       self.pp_src_ip, dst_ip,
                                       self.pp_src_port, dst_port)
         else:
-            header = encode.encode_v2(PROXY_PROTOCOL.TCP4,
+            header = encode.encode_v2(TCP4,
                                       self.pp_src_ip, dst_ip,
                                       self.pp_src_port, dst_port)
 
