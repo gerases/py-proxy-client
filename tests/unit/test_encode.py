@@ -1,13 +1,21 @@
 import unittest
+from socket import AF_INET
 
-from pyproxy.const import TCP4
-from pyproxy.encode import encode_v1
+from pyproxy.const import V1
+from pyproxy.header import HeaderEncoder
 
 
 class EncodeV1Test(unittest.TestCase):
 
     def test_encodes_exact_bytes(self):
-        header = encode_v1(TCP4, '1.1.1.1', '2.2.2.2', 1000, 80)
+        encoder = HeaderEncoder(V1,
+                                AF_INET,
+                                '1.1.1.1',
+                                '2.2.2.2',
+                                1000,
+                                80,
+                                )
+        header = encoder.encode()
         expected_header = b'\x50\x52\x4F\x58\x59'               # 'PROXY'
         expected_header += b'\x20'                              # ' '
         expected_header += b'\x54\x43\x50\x34'                  # 'TCP4'

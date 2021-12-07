@@ -1,11 +1,12 @@
 """Module for testing proxy sockets"""
 
 import unittest
+from socket import AF_INET
 
 from mock import Mock
 
-from pyproxy.const import TCP4, V1, V2
-from pyproxy.encode import encode_v1, encode_v2
+from pyproxy.const import V1, V2
+from pyproxy.header import HeaderEncoder
 from pyproxy.sock import ProxyProtocolSocket
 
 
@@ -105,15 +106,13 @@ class ProxyProtocolSocketHeaderTest(BaseProxyProtocolSocketTest):
             src_ip, src_port = src_addr
         else:
             src_ip, src_port = self.src_ip, self.src_port
-        if pp_version == V1:
-            expected_header = encode_v1(TCP4,
-                                        src_ip, self.dst_ip,
-                                        src_port, self.dst_port)
-        else:
-            expected_header = encode_v2(TCP4,
-                                        src_ip,
-                                        self.dst_ip, src_port,
-                                        self.dst_port)
+
+        encoder = HeaderEncoder(pp_version,
+                                AF_INET,
+                                src_ip, self.dst_ip,
+                                src_port, self.dst_port,
+                                )
+        expected_header = encoder.encode()
 
         # pylint: disable=protected-access
         sock._send_pp_header()

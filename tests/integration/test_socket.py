@@ -1,7 +1,8 @@
 import unittest
+from socket import AF_INET
 
-from pyproxy.const import TCP4, V1, V2
-from pyproxy.encode import encode_v1, encode_v2
+from pyproxy.const import V1, V2
+from pyproxy.header import HeaderEncoder
 from pyproxy.sock import ProxyProtocolSocket
 from tests.integration import TestStreamServer
 
@@ -34,11 +35,13 @@ class ProxyProtocolV1SocketTest(unittest.TestCase):
         self.v1_sock.connect(self.mock_server_address)
         resp = self.v1_sock.recv(1024)
 
-        header = encode_v1(TCP4,
-                           self.client_ip,
-                           self.server_host,
-                           self.client_port,
-                           self.server_port)
+        encoder = HeaderEncoder(V1,
+                                AF_INET,
+                                self.client_ip,
+                                self.server_host,
+                                self.client_port,
+                                self.server_port)
+        header = encoder.encode()
 
         self.assertEqual(header.strip(), resp)
 
@@ -49,11 +52,13 @@ class ProxyProtocolV1SocketTest(unittest.TestCase):
     def test_proxy_protocol_v2(self):
         self.v2_sock.connect(self.mock_server_address)
         resp = self.v2_sock.recv(1024)
-        header = encode_v2(TCP4,
-                           self.client_ip,
-                           self.server_host,
-                           self.client_port,
-                           self.server_port)
+        encoder = HeaderEncoder(V2,
+                                AF_INET,
+                                self.client_ip,
+                                self.server_host,
+                                self.client_port,
+                                self.server_port)
+        header = encoder.encode()
 
         self.assertEqual(header.strip(), resp)
 

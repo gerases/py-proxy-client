@@ -4,9 +4,9 @@ which uses the proxy protocol
 """
 import socket
 
-from pyproxy import encode
-from pyproxy.const import TCP4, V1, V2
+from pyproxy.const import V1, V2
 from pyproxy.error import ProxyProtocolError
+from pyproxy.header import HeaderEncoder
 
 
 class ProxyProtocolSocket(socket.socket):
@@ -53,16 +53,19 @@ class ProxyProtocolSocket(socket.socket):
         if not self.pp_src_ip or not self.pp_src_port:
             self.pp_src_ip, self.pp_src_port = self.getsockname()
 
-        if self.proxy_version == V1:
-            header = encode.encode_v1(TCP4,
-                                      self.pp_src_ip, dst_ip,
-                                      self.pp_src_port, dst_port)
-        else:
-            header = encode.encode_v2(TCP4,
-                                      self.pp_src_ip, dst_ip,
-                                      self.pp_src_port, dst_port)
+        encoder = HeaderEncoder(self.proxy_version,
+                                self.family,
+                                self.pp_src_ip, dst_ip,
+                                self.pp_src_port, dst_port,
+                                )
+        header = encoder.encode()
 
-        self.sendall(header)
+        try:
+            self.sendall(header)
+        except Exception as e:
+            self.close()
+            raise ProxyProtocolError('Failed to send proxy protocol header',
+                                     e) from e
 
     def connect(self, address):
         """
@@ -71,11 +74,4 @@ class ProxyProtocolSocket(socket.socket):
         :param address:     Tuple describing the address to connect to
         """
         super().connect(address)
-        try:
-            self._send_pp_header()
-        except Exception as e:
-            self.close()
-            raise ProxyProtocolError(
-                'Failed to send proxy protocol header',
-                e
-            ) from e
+        self._send_pp_header()
