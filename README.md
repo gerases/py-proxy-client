@@ -1,9 +1,7 @@
 py-proxy-protocol
 -----------------
 
-This code is based on a fork from https://github.com/efossier/py-proxy-protocol, which implemented version 1 of the protocol. The protocol is based on this specification: [proxy-protocol](https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt)
-
-I refactored the code for python3 and added a working implementation of version 2 of the protocol with the exception of the Type-Length-Value (TLV vectors).
+The protocol is based on this specification: [proxy-protocol](https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt). The code was originally based on a fork from https://github.com/efossier/py-proxy-protocol, which implemented version 1 of the protocol. Version 2 was added as a result of a refactoring. The Type-Length-Value (TLV vectors) are not currently implemented.
 
 ### Installation
 
